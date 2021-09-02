@@ -59,3 +59,29 @@ def get_zillow_data():
         df.to_csv('zillow_df.csv')
         
     return df
+
+def handle_NaN():
+    '''
+    This function handles the NaN values for the Zillow data (could be used for other dataframes). 
+    Takes in a dataframe and returns a dataframe with the NaN values replaced with the mean.
+    '''
+
+    # replaces NaN with the mean of the column
+    imputer = SimpleImputer(strategy = 'mean')
+    for col in df.columns:
+        df[[col]] = imputer.fit_transform(df[[col]])
+
+    return df
+
+def wrangle_zillow():
+    '''
+    This function handels getting the data from the zillow database and getting it ready to visualize.
+    It returns the dataframe ready to work with.
+    Uses other helper functions in wrangle.py to get this done. 
+    '''
+
+    df = get_zillow_data()
+
+    df = handle_NaN()
+
+    return df
