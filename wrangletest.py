@@ -23,13 +23,13 @@ from env import host, user, password
 # Acquire Zillow Data
 
 # Create function to get the necessary connection url and retrieve zillow data
-def acquire_zillow():
+def acquire_zillow(db, user=user, host=host, password=password):
     '''
     This function uses my info from my env file to
     create a connection url to access the Codeup db. It takes in a string 
     name of a database as an argument
     '''
-    url = f'mysql+pymysql://{user}:{password}@{host}/zillow'
+    return f'mysql+pymysql://{user}:{password}@{host}/{db}'
 
     '''
     This function reads the Telco data from the Codeup db
@@ -42,7 +42,7 @@ def acquire_zillow():
     WHERE propertylandusetypeid = 261 
     '''
     # Read in DataFrame from Codeup db.
-    df = pd.read_sql(sql_query, url)
+    df = pd.read_sql(sql_query, get_connection('zillow'))
     
     # renaming column names to one's I like better
     df = df.rename(columns = {'bedroomcnt':'bedrooms', 
@@ -184,3 +184,38 @@ def wrangle_zillow():
     return train, validate, test
 
 
+
+def get_zillow_data():
+    '''
+    This function reads in zillow data from Codeup database, writes data to
+    a csv file if a local file does not exist, and returns a df.
+    '''
+    if os.path.isfile('zillow_df.csv'):
+        
+        # If csv file exists read in data from csv file.
+        df = pd.read_csv('zillow_df.csv', index_col=0)
+        
+    else:
+        
+        # Read fresh data from db into a DataFrame
+        df = new_zillow_data()
+        
+        # Cache data
+        df.to_csv('zillow_df.csv')
+        
+    return df
+
+
+
+def wrangle_zillow():
+    '''
+    This function handels getting the data from the zillow database and getting it ready to visualize.
+    It returns the dataframe ready to work with.
+    Uses other helper functions in wrangle.py to get this done. 
+    '''
+
+    df = get_zillow_data()
+
+    df = handle_NaN()
+
+    return df
